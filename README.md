@@ -5,6 +5,6 @@
 
 Leveraging LoRA adapters, the system supports scalable, pluggable inference by training separate adapters per product category or support domain. The architecture is designed for real-world deployment.
 
-## Tech Stack
+### Tech Stack
 
 - Python · Hugging Face Transformers · PEFT (LoRA) · FastAPI · Docker · PyTorch · pandas · scikit-learn · pytest · Streamlit · GitHub Actions (CI) · logging · dotenv · modular code structure
