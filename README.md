@@ -1,3 +1,16 @@
+## Staus
+
+Still working on
+
+To do: 
+- create info the new dataset. Have a current dataset. 
+- 
+
+
+## Inspiration for this project
+
+
+
 
 ## Introduction
 This project demonstrates how LoRA (Low‑Rank Adaptation) fine‑tunes a single base language model into multiple specialized versions using lightweight adapters. Each adapter is trained for a specific subset of the dataset, enabling businesses to achieve domain‑specific accuracy without retraining the full model.
@@ -12,6 +25,11 @@ An adapter is a compact, domain‑specific module (e.g., electronics, clothing, 
 In this project, we train three separate adapters: one for electronics, one for clothing, and one for home products. For example, the electronics adapter learns terms like "Bluetooth connectivity issues," while the clothing adapter understands "fabric shrinkage after wash." Once trained, adapters can be swapped in to provide targeted classification or domain‑aware support responses.
 
 Business case: For companies with diverse product lines, adapters enable rapid customization for each market segment without retraining the entire model. This approach lowers operational costs, accelerates deployment, and improves customer satisfaction through domain‑specific accuracy. Businesses can prioritize critical domains first and expand coverage incrementally.
+
+
+## Dataset
+The dataset is from Kaggle and consist 
+Dang, I'm doing something wrong. 
 
 ## Metrics
 Each adapter is evaluated on its own filtered test set and compared to a zero‑shot base model.
@@ -32,9 +50,8 @@ Training time – Duration of fine‑tuning.
 Inference speed – Latency and throughput per prediction.
 
 
-### Tech Stack
+## Tech Stack
 
-- Python · Hugging Face Transformers · PEFT (LoRA) · FastAPI · Docker · PyTorch · pandas · scikit-learn · pytest · Streamlit · GitHub Actions (CI) · logging · dotenv · modular code structure
+Python · Hugging Face Transformers · PEFT (LoRA) · FastAPI · Docker · PyTorch · pandas · scikit-learn · pytest · Streamlit · GitHub Actions (CI) · logging · dotenv · modular code structure
 
-### Next steps
-- Preprocess Amazon data
+## Next steps
