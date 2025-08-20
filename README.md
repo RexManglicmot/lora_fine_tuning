@@ -52,6 +52,5 @@ Inference speed – Latency and throughput per prediction.
 
 ## Tech Stack
 
-Python · Hugging Face Transformers · PEFT (LoRA) · FastAPI · Docker · PyTorch · pandas · scikit-learn · pytest · Streamlit · GitHub Actions (CI) · logging · dotenv · modular code structure
 
 ## Next steps
