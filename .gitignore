@@ -1,2 +1,5 @@
 # Venv
-venv_ai_lora_tuning
+venv_ai_lora_tuningdf_cleaned.csv
+alldata_1_for_kaggle.csv
+alldata_1_for_kaggle_cleaned.csv
+*.csv
