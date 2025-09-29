@@ -9,3 +9,6 @@ venv_ai_lora_tuning
 
 # Folders
 pics/
+old_project_files/
+
+.gitignore
