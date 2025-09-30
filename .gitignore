@@ -13,3 +13,5 @@ old_project_files/
 
 # Env
 .env
+
+*.csv
