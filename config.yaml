@@ -7,7 +7,7 @@ project:
   output_dir: outputs
 
 paths:
-  raw_csv: data/raw/cancer_texts.csv
+  raw_csv: data/raw/df_cleaned.csv
   splits_dir: data/processed
   outputs_dir: outputs
   metrics_dir: outputs/metrics
