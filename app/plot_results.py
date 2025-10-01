@@ -112,7 +112,7 @@ def plot_confusion(conf_csv: Path, labels: list[str], out_png: Path):
     cm = pd.read_csv(conf_csv, index_col=0).values
     n = len(labels)
 
-    fig, ax = plt.subplots(figsize=(5.8, 5.2))
+    fig, ax = plt.subplots(figsize=(8.4, 4.8))
 
     # Use single-hue cmap matching your teal
     cmap = _single_hue_cmap(PALETTE["macro_f1"])
