@@ -8,30 +8,19 @@ import matplotlib as mpl
 import matplotlib.pyplot as plt
 
 from app.config import cfg
-from matplotlib.colors import LinearSegmentedColormap, to_rgb
-from sklearn.metrics import confusion_matrix
 
-# --- helper to build a single-hue colormap (white -> chosen color) ---
+from matplotlib.colors import LinearSegmentedColormap, to_rgb
+
 def _single_hue_cmap(hex_color: str, name: str = "single_hue"):
     rgb = to_rgb(hex_color)
-    return LinearSegmentedColormap.from_list(name, [(1, 1, 1), rgb], N=256)
+    return LinearSegmentedColormap.from_list(name, [(1,1,1), rgb], N=256)
 
-# ---------- palette (matches your bars) ----------
+# ---------- minimal, consistent theme ----------
 PALETTE = {
     "macro_f1": "#3BA79E",  # teal
-    "accuracy": "#D7EBE9",  # light teal
+    "accuracy": "#D7EBE9",  # lime-yellow
     "text_dark": "#1F1F1F",
-    "cm_cmap": "Greys",     # (unused when single-hue cmap below is used)
-}
-
-# ---------- unified typography ----------
-SIZES = {
-    "base": 11,     # default text
-    "title": 14,    # axes title
-    "label": 12,    # axis & colorbar labels
-    "tick": 11,     # tick labels
-    "legend": 11,   # legend
-    "annot": 11,    # annotations on bars/points/cells
+    "cm_cmap": "Greys",
 }
 
 def _apply_theme():
@@ -39,12 +28,12 @@ def _apply_theme():
         "figure.dpi": 160,
         "savefig.dpi": 160,
         "figure.constrained_layout.use": True,
-        "font.size": SIZES["base"],
-        "axes.titlesize": SIZES["title"],
-        "axes.labelsize": SIZES["label"],
-        "xtick.labelsize": SIZES["tick"],
-        "ytick.labelsize": SIZES["tick"],
-        "legend.fontsize": SIZES["legend"],
+        "font.size": 11,
+        "axes.titlesize": 12,
+        "axes.labelsize": 11,
+        "xtick.labelsize": 10,
+        "ytick.labelsize": 10,
+        "legend.fontsize": 10,
         "axes.titlepad": 8,
         "axes.labelpad": 6,
         "axes.edgecolor": "#C7C7C7",
@@ -52,8 +41,6 @@ def _apply_theme():
         "axes.facecolor": "white",
         "figure.facecolor": "white",
         "axes.grid": False,
-        # If you want a fixed font family everywhere, uncomment:
-        # "font.family": "DejaVu Sans",
     })
 
 def _polish_axes(ax):
@@ -71,6 +58,7 @@ def _read_json(p: Path):
     return json.loads(p.read_text(encoding="utf-8"))
 
 def _savefig(fig: plt.Figure, path: Path):
+    """Create parent dir, save, and print the absolute path so you can find it."""
     path.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(path, dpi=200, bbox_inches="tight", pad_inches=0.1)
     plt.close(fig)
@@ -99,7 +87,7 @@ def plot_macro_f1_by_method(results_csv: Path, out_png: Path):
     for b in bars:
         h = b.get_height()
         ax.text(b.get_x() + b.get_width()/2, h + 0.015, f"{h:.3f}",
-                ha="center", va="bottom", fontsize=SIZES["annot"])
+                ha="center", va="bottom")
 
     _polish_axes(ax)
     _savefig(fig, out_png)
@@ -114,11 +102,12 @@ def plot_confusion(conf_csv: Path, labels: list[str], out_png: Path):
 
     fig, ax = plt.subplots(figsize=(5.8, 5.2))
 
-    # Use single-hue cmap matching your teal
+    # modern colormap API (fixes deprecation)
+    # cmap = mpl.colormaps[PALETTE["cm_cmap"]]
     cmap = _single_hue_cmap(PALETTE["macro_f1"])
     im = ax.imshow(cm, cmap=cmap, vmin=0, vmax=1, aspect="equal")
 
-    # Black borders around each cell
+    # draw black edges around each cell
     for i in range(n):
         for j in range(n):
             ax.add_patch(plt.Rectangle(
@@ -126,16 +115,19 @@ def plot_confusion(conf_csv: Path, labels: list[str], out_png: Path):
                 fill=False, edgecolor="black", linewidth=0.5,
                 joinstyle="miter", zorder=3
             ))
+    # Outer frame black too
+    # for s in ax.spines.values():
+    #     s.set_visible(True)
+    #     s.set_color("black")
+    #     s.set_linewidth(1.2)
 
-    # Colorbar with unified font sizes
     cbar = fig.colorbar(im, ax=ax, fraction=0.046, pad=0.04)
-    cbar.ax.set_ylabel("Row-normalized", rotation=90, va="center",
-                       color=PALETTE["text_dark"], fontsize=SIZES["label"])
-    cbar.ax.tick_params(colors=PALETTE["text_dark"], labelsize=SIZES["tick"])
+    cbar.ax.set_ylabel("Row-normalized", rotation=90, va="center", color=PALETTE["text_dark"])
+    cbar.ax.tick_params(colors=PALETTE["text_dark"])
 
     ax.set_xticks(np.arange(n)); ax.set_xticklabels(labels, rotation=30, ha="right", color=PALETTE["text_dark"])
     ax.set_yticks(np.arange(n)); ax.set_yticklabels(labels, color=PALETTE["text_dark"])
-    ax.set_title("LoRA Confusion Matrix (row-normalized)")
+    ax.set_title("LoRA Confusion Matrix (row-normalized)", color=PALETTE["text_dark"])
 
     # Auto-contrast annotations
     for i in range(n):
@@ -144,8 +136,7 @@ def plot_confusion(conf_csv: Path, labels: list[str], out_png: Path):
             r, g, b, _ = cmap(v)
             lum = 0.2126*r + 0.7152*g + 0.0722*b
             text_color = "#FFFFFF" if lum < 0.45 else "#000000"
-            ax.text(j, i, f"{v*100:.0f}%", ha="center", va="center",
-                    fontsize=SIZES["annot"], color=text_color)
+            ax.text(j, i, f"{v*100:.0f}%", ha="center", va="center", fontsize=10, color=text_color)
 
     for s in ax.spines.values():
         s.set_visible(False)
@@ -168,23 +159,21 @@ def plot_macro_f1_and_accuracy(results_csv: Path, out_png: Path):
     width = 0.38
 
     fig, ax = plt.subplots(figsize=(8.4, 4.8))
-    b1 = ax.bar(x - width/2, y_f1, width, label="Macro-F1",
-                color=PALETTE["macro_f1"], edgecolor="black")
-    b2 = ax.bar(x + width/2, y_acc, width, label="Accuracy",
-                color=PALETTE["accuracy"], edgecolor="black")
+    b1 = ax.bar(x - width/2, y_f1, width, label="Macro-F1", color=PALETTE["macro_f1"], edgecolor="black")
+    b2 = ax.bar(x + width/2, y_acc, width, label="Accuracy", color=PALETTE["accuracy"], edgecolor="black")
 
     ax.set_xticks(x)
     ax.set_xticklabels(methods)
     ax.set_ylabel("Score")
     ax.set_title("Macro-F1 and Accuracy by Method")
     ax.set_ylim(0, max(1.02, float(np.max([y_f1.max(), y_acc.max()])) * 1.05))
-    ax.legend(loc="upper left", bbox_to_anchor=(1, 1), frameon=False, prop={"size": SIZES["legend"]})
+    ax.legend(loc="upper left", bbox_to_anchor=(1, 1), frameon=False)
 
     def _annotate(bars):
         for bar in bars:
             h = bar.get_height()
             ax.text(bar.get_x() + bar.get_width()/2, h + 0.015, f"{h:.3f}",
-                    ha="center", va="bottom", fontsize=SIZES["annot"])
+                    ha="center", va="bottom")
     _annotate(b1); _annotate(b2)
 
     _polish_axes(ax)
@@ -210,23 +199,31 @@ def plot_val_curve_if_exists(metrics_dir: Path, out_png: Path):
     fig, ax = plt.subplots(figsize=(7.2, 4.2))
     ax.plot(
         xs, curve, marker="o", linewidth=1.6, color=PALETTE["macro_f1"],
-        markeredgecolor="black", markerfacecolor=PALETTE["accuracy"]
+        markeredgecolor="black", markerfacecolor="#D7EBE9"
     )
 
-    # labels BELOW each point
+    # --- add value labels above each dot ---
     for x, y in zip(xs, curve):
-        ax.annotate(f"{y:.3f}", xy=(x, y), xytext=(0, -15),
-                    textcoords="offset points", ha="center", va="top",
-                    fontsize=SIZES["annot"])
+        ax.annotate(f"{y:.3f}",
+                xy=(x, y),
+                xytext=(0, -15),               # ↓ 10 px below the point
+                textcoords="offset points",
+                ha="center", va="top",
+                fontsize=10)
 
-    # bounds with headroom for labels below top/bottom
-    bottom = max(0.0, float(np.min(curve)) - 0.12)
+    # give room under the lowest point so labels aren't clipped
+    bottom = max(0.0, float(np.min(curve)) - 0.12)   # ~0.12 headroom
     top    = max(1.05, float(np.max(curve)) * 1.05)
     ax.set_ylim(bottom, top)
+    # ---------------------------------------
 
     ax.set_xlabel("Epoch")
     ax.set_ylabel("Val Macro-F1")
     ax.set_title(f"Validation Macro-F1 per Epoch (LoRA r={r})")
+
+    # give extra headroom so labels never get clipped
+    top = max(1.05, float(np.max(curve)) * 1.05)
+    ax.set_ylim(0, top)
     ax.set_xlim(0.5, len(curve) + 0.5)
     ax.set_xticks(xs)
 
@@ -247,6 +244,7 @@ def plot_efficiency_panel(results_csv: Path, out_png: Path):
 
     methods = df["method"].tolist()
     mb = df["trainable_params_mb"].to_numpy(dtype=float)
+    # `training_time_wall` was written in **seconds** by train_lora.py → convert to minutes
     mins = (df["training_time_wall"].to_numpy(dtype=float) / 60.0)
 
     x = np.arange(len(methods))
@@ -255,19 +253,19 @@ def plot_efficiency_panel(results_csv: Path, out_png: Path):
     fig, axes = plt.subplots(1, 2, figsize=(9.6, 4.2))
     ax0, ax1 = axes
 
-    # Trainable Params (MB)
+    # --- Trainable Params (MB) ---
     b0 = ax0.bar(x, mb, width=w, color=PALETTE["macro_f1"], edgecolor="black")
     ax0.set_xticks(x); ax0.set_xticklabels(methods)
     ax0.set_ylabel("MB")
     ax0.set_title("Trainable Parameters (MB)")
-    ax0.set_ylim(0, max(1.02, float(mb.max()) * 1.15) if mb.size else 1.0)
+    ax0.set_ylim(0, max(1.02, float(mb.max()) * 1.15))
     for bar in b0:
         h = bar.get_height()
-        ax0.text(bar.get_x() + bar.get_width()/2, h + (0.03 * max(1.0, mb.max() if mb.size else 1.0)),
-                 f"{h:.1f}", ha="center", va="bottom", fontsize=SIZES["annot"])
+        ax0.text(bar.get_x() + bar.get_width()/2, h + (0.03 * max(1.0, mb.max())),
+                 f"{h:.1f}", ha="center", va="bottom", fontsize=10)
     _polish_axes(ax0)
 
-    # Training Time (min)
+    # --- Training Time (min) ---
     b1 = ax1.bar(x, mins, width=w, color=PALETTE["accuracy"], edgecolor="black")
     ax1.set_xticks(x); ax1.set_xticklabels(methods)
     ax1.set_ylabel("Minutes")
@@ -275,12 +273,14 @@ def plot_efficiency_panel(results_csv: Path, out_png: Path):
     ax1.set_ylim(0, max(1.02, float(mins.max()) * 1.15) if mins.size and mins.max() > 0 else 1.0)
     for bar in b1:
         h = bar.get_height()
-        ax1.text(bar.get_x() + bar.get_width()/2, h + (0.03 * max(1.0, mins.max() if mins.size else 1.0)),
-                 f"{h:.1f}", ha="center", va="bottom", fontsize=SIZES["annot"])
+        ax1.text(bar.get_x() + bar.get_width()/2, h + (0.03 * max(1.0, mins.max())),
+                 f"{h:.1f}", ha="center", va="bottom", fontsize=10)
     _polish_axes(ax1)
 
     fig.tight_layout()
     _savefig(fig, out_png)
+
+from sklearn.metrics import confusion_matrix
 
 def plot_delta_confusion_from_pairs(paired_csv: Path, labels: list[str], out_png: Path):
     """LoRA − Baseline delta confusion (row-normalized) from paired_preds.csv."""
@@ -295,35 +295,46 @@ def plot_delta_confusion_from_pairs(paired_csv: Path, labels: list[str], out_png
 
     cm_base = confusion_matrix(gold, base_pred, labels=labels, normalize="true")
     cm_lora = confusion_matrix(gold, lora_pred, labels=labels, normalize="true")
-    dcm = cm_lora - cm_base  # in [-1, 1]
+    dcm = cm_lora - cm_base                               # in [−1, 1]
 
     n = len(labels)
     fig, ax = plt.subplots(figsize=(6.2, 5.4))
 
+    # symmetric diverging scale around 0
     vmax = float(np.abs(dcm).max())
-    vmax = 0.01 if vmax == 0 else vmax  # avoid zero range
+    vmax = 0.01 if vmax == 0 else vmax                   # avoid zero range
     im = ax.imshow(dcm, cmap="RdBu_r", vmin=-vmax, vmax=vmax, aspect="equal")
 
+    # colorbar in percentage points
     cbar = fig.colorbar(im, ax=ax, fraction=0.046, pad=0.04)
-    cbar.set_label("LoRA − Baseline (pp)", fontsize=SIZES["label"])  # percentage points
-    cbar.ax.tick_params(labelsize=SIZES["tick"])
+    cbar.set_label("LoRA − Baseline (pp)")               # percentage points
+    tick_vals = np.linspace(-vmax, vmax, 5)
+    cbar.set_ticks(tick_vals)
+    cbar.set_ticklabels([f"{t*100:.0f}" for t in tick_vals])
 
     ax.set_xticks(np.arange(n)); ax.set_xticklabels(labels, rotation=30, ha="right")
     ax.set_yticks(np.arange(n)); ax.set_yticklabels(labels)
     ax.set_title("Δ-Confusion (LoRA − Baseline, row-normalized)")
 
+    # annotations: signed percentage points
     for i in range(n):
         for j in range(n):
             ax.text(j, i, f"{dcm[i,j]*100:+.0f} pp",
                     ha="center", va="center",
                     color="black" if abs(dcm[i,j]) < vmax*0.55 else "white",
-                    fontsize=SIZES["annot"])
+                    fontsize=10)
+
+    # crisp black cell borders
+    for i in range(n):
+        for j in range(n):
             ax.add_patch(plt.Rectangle((j-0.5, i-0.5), 1, 1,
                                        fill=False, edgecolor="black",
                                        linewidth=1.0, zorder=3))
     ax.set_xlim(-0.5, n-0.5); ax.set_ylim(n-0.5, -0.5)
 
     _savefig(fig, out_png)
+
+
 
 # ---------- main ----------
 def main():
@@ -337,7 +348,7 @@ def main():
     # Required plots
     plot_confusion(metrics_dir / "confusion_lora.csv", cfg.labels, figs_dir / "confusion_matrix_lora.png")
 
-    # Grouped bar: Macro-F1 + Accuracy on one chart
+    # Grouped bar: Macro-F1 + Accuracy on ONE chart
     plot_macro_f1_and_accuracy(
         results_csv = metrics_dir / "results.csv",
         out_png     = figs_dir / "method_bars_macroF1_accuracy.png"
@@ -346,11 +357,13 @@ def main():
     # Optional plots
     plot_val_curve_if_exists(metrics_dir, figs_dir / "val_macro_f1_per_epoch.png")
     plot_efficiency_panel(metrics_dir / "results.csv", figs_dir / "efficiency_panel.png")
+
     plot_delta_confusion_from_pairs(
         metrics_dir / "paired_preds.csv",
         cfg.labels,
         figs_dir / "delta_confusion_lora_minus_baseline.png"
     )
+
 
     print("[plot_results] Saved figures to", figs_dir.resolve())
 
