@@ -25,18 +25,26 @@ The dataset was found on Kaggle. It is a cancer dataset that
 
 ## Metrics
 
-Macro-F1
+**Macro-F1** is the average of per-class F1 scores with equal weight, so it shows balanced performance even when classes are imbalanced.
 
-Accuracy
+**Accuracy** is the fraction of all test cases predicted correctly, which can look high if one class dominates.
 
+**Latency (p50 and p95)** reports typical and tail response times per request, with p50 as the median and p95 capturing slower outliers.
 
+**Tokens/s** measures inference throughput as tokens processed per second, where higher numbers mean faster serving.
 
+**Trainable Params (MB**) is the size of the parameters actually updated during training, indicating how lightweight the adaptation is.
 
+**Train Time (min)** is the wall-clock time to reach the best checkpoint, showing how quickly the adapter converges.
 
 
 ## Results: Table, Performance
+| Method | Macro-F1 | Accuracy | F1 (Colon) | F1 (Lung) | Latency p50 / p95 (ms) | Tokens/s | Trainable Params (MB) | Train Time (min) |
+|---|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
+| ZeroShot | 0.666 | 0.667 | 0.647 | 0.684 | 130.3 / 130.4 | 31.68 | 0.0 | 0.0 |
+| LoRA-r8 | 0.954 | 0.958 | 0.939 | 0.968 | 172.9 / 173.1 | 17.36 | 41.9 | 8.4 |
 
-
+LoRA-r8 delivers a substantial lift over zero-shot: Macro-F1/Accuracy improve from 0.666/0.667 to 0.954/0.958, with per-class F1 reaching 0.939 (Colon) and 0.968 (Lung). The gains are balanced across classes, with only a modest latency increase (p50 ~130→173 ms) and lower throughput (31.68→17.36 tokens/s), while training stayed lightweight (~41.9 MB adapters, ~8.4 min). Because the adapter is tiny and quick to train, routine per-site retraining to manage drift is feasible without heavy infrastructure.
 
 
 
@@ -67,9 +75,14 @@ Because LoRA learns small adapters, they’re fast to retrain, easy to store/sha
 In practice, this is why LoRA: you get rapid task adaptation at low compute and storage cost, making iteration and deployment much lighter.
 
 ## Results: Table, Statistical Significance
+| Test | Metric | Effect (LoRA − Base) | 95% CI | p-value | Notes |
+|---|---|---:|---|---:|---|
+| Paired bootstrap | Macro-F1 | **+0.2880** | **[0.1795, 0.4026]** | **< 0.0002** | 5000 resamples |
+| McNemar (paired) | Accuracy | **+0.2917** | — | **6e-06** | b=22, c=1 |
 
+The paired bootstrap resamples the same test cases to estimate the Macro F1 improvement, which here is +0.2880 with 95% CI [0.1795, 0.4026] and p < 0.0002, indicating a large and reliable gain. McNemar’s test compares accuracy on the same items by counting disagreements, yielding +0.2917 with p = 6e-06, which confirms the advantage is very unlikely to be due to chance.
 
-
+For this Lung vs Colon cancer task, LoRA fixes far more errors than it introduces b = 22 vs c = 1, so the benefit should be felt in day-to-day use. The interval suggests future runs on similar data should retain a meaningful Macro F1 lift between roughly +0.18 and +0.40, while remaining work should focus on the residual Colon to Lung confusion shown in the confusion matrix.
 
 
 
