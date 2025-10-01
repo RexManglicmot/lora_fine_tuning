@@ -2,7 +2,7 @@
 > **LoRA (r=8)** lifts zero-shot **Macro-F1/Accuracy from 0.666/0.667 to 0.954/0.958** while training only **~42 MB** of adapters in **~8.4 min.**
 
 ## Inspiration
-I wanted to do a LoRA because I wanted another way to tune a model without occuring computational costs and money. 
+I wanted to do a LoRA because I wanted another way to tune a model without occuring computational costs and money with respect to full-fine tuning. I found these interesting videos HERE, HERE, and HERE, which talks about what LoRA is. It piqued my interest and again wanted to apply it to my own interests in puublic helath and the broad 
 
 ## Introduction
 **LoRA (Low-Rank Adaptation)** fine-tunes a big model by freezing the original weights and learning tiny **adapters**—small add-on modules that nudge the model for your task. The adapter’s **rank** 𝑟 is just a knob for how big/expressive that add-on is: higher 𝑟 = more capacity; lower 𝑟 = smaller and faster. Because only the adapters learn (not the whole model), you train far fewer parameters, use less memory, and finish much quicker.
@@ -11,9 +11,25 @@ From a business view, LoRA cuts **GPU cost** and **time-to-value**, makes MLOps 
 
 Talk abour r= {8, 16}
 
-## Dataset
-The dataset was found on Kaggle. It is a cancer dataset that 
+batch_tokens: 2048        # effective batch size in tokens, epochs = 8, and a lr: 0.0001 # 1e-4
 
+Objective of this project is:...
+
+
+
+
+## Dataset
+This project uses a Kaggle cancer text dataset covering Lung, Colon, and Thyroid cancers [Kaggle](https://www.kaggle.com/datasets/iamtanmayshukla/medical-text-classification-using-nlp)
+). To reduce inference cost and focus on the target task, Thyroid was removed and the problem was framed as binary classification (Lung vs Colon). The full corpus is roughly Lung `n=2180` and Colon `n=2580`. The subset used here is shown below, and any residual skew is addressed during training with a class-balanced sampler.
+
+| Split | Lung_Cancer | Colon_Cancer | Total |
+|---|---:|---:|---:|
+| train | 361 | 208 | 569 |
+| val | 45 | 26 | 71 |
+| test | 46 | 26 | 72 |
+| **Total** | **452** | **260** | **712** |
+
+*Counts reflect the subset used in this repo after preprocessing. The original dataset is larger.*
 
 ## Model
 **`mistralai/Mistral-7B-Instruct-v0.3`** was the base model from [HuggineFace](https://huggingface.co/mistralai/Mistral-7B-Instruct-v0.3). It’s a compact, open-weights LLM with strong accuracy per parameter, so you get competitive zero-shot performance and a great starting point for small adapters. Because it’s memory- and compute-efficient, it fits comfortably on a single GPU and is LoRA-friendly;  can train tiny adapters quickly without touching the base weights. It's broad ecosystem support (tokenizer, checkpoints, PEFT compatibility) make it a practical, production-ready choice for fast iteration and low-cost customization.
