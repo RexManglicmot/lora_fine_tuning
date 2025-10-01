@@ -1,56 +1,74 @@
-## Staus
-
-Still working on
-
-To do: 
-- create info the new dataset. Have a current dataset. 
-- 
-
-
-## Inspiration for this project
-double check if it worked.
+## Inspiration
 
 
 
 ## Introduction
-This project demonstrates how LoRA (Low‑Rank Adaptation) fine‑tunes a single base language model into multiple specialized versions using lightweight adapters. Each adapter is trained for a specific subset of the dataset, enabling businesses to achieve domain‑specific accuracy without retraining the full model.
 
-Goal is to develop a production‑ready pipeline to train, evaluate, and manage LoRA adapters, using derived category subsets of the dataset, and compare their performance and efficiency against a zero‑shot base model.
-
-## LoRA Tuning
-LoRA (Low‑Rank Adaptation) fine‑tunes a pretrained LLM by adding small trainable layers—adapters—instead of updating all model weights. This allows domain specialization without retraining the entire model, saving time, compute, and storage.
-
-An adapter is a compact, domain‑specific module (e.g., electronics, clothing, home) that plugs into the frozen base model to tailor it for a specific use case. 
-
-In this project, we train three separate adapters: one for electronics, one for clothing, and one for home products. For example, the electronics adapter learns terms like "Bluetooth connectivity issues," while the clothing adapter understands "fabric shrinkage after wash." Once trained, adapters can be swapped in to provide targeted classification or domain‑aware support responses.
-
-Business case: For companies with diverse product lines, adapters enable rapid customization for each market segment without retraining the entire model. This approach lowers operational costs, accelerates deployment, and improves customer satisfaction through domain‑specific accuracy. Businesses can prioritize critical domains first and expand coverage incrementally.
 
 
 ## Dataset
-The dataset is from Kaggle and consist 
-Dang, I'm doing something wrong. 
+
+
+
+
+## Model
+
+
+
+
+
+## Workflow
+
+
+
 
 ## Metrics
-Each adapter is evaluated on its own filtered test set and compared to a zero‑shot base model.
-
-Performance Metrics:
-
-Accuracy – Percentage of correct predictions.
-Precision – Percentage of predicted positives that are correct.
-Recall – Percentage of actual positives correctly identified.
-Macro‑F1 – Average F1 across all classes equally.
-Micro‑F1 – F1 weighted by class frequency.
-Confusion Matrix – Predicted vs. actual classification counts.
-
-Efficiency Metrics (PEFT):
-
-Adapter size – Storage size of LoRA adapter.
-Training time – Duration of fine‑tuning.
-Inference speed – Latency and throughput per prediction.
 
 
-## Tech Stack
 
 
-## Next steps
+
+## Results: Table, Performance
+
+
+
+
+
+
+
+## Results: Visuals
+![Macro-F1](./outputs/figures/method_bars_macroF1_accuracy.png) LoRA (r=8) boosts performance from Macro-F1 0.666 / Accuracy 0.667 (zero-shot) to 0.954 / 0.958—about a +0.29 absolute gain on both metrics. The sizable Macro-F1 jump indicates the improvement is spread across classes rather than driven by one label. And because LoRA updates only a small adapter, this gain comes with minimal training overhead compared with full fine-tuning.
+
+
+![LoRA Confusion](./outputs/figures/confusion_matrix_lora.png) Colon_Cancer is correctly predicted 88% of the time and misclassified as Lung_Cancer 12% of the time; Lung_Cancer is 100% correct with 0% misclassified as Colon.
+High values on the diagonal indicate strong recall per class (perfect for Lung, near-perfect for Colon), and the only error type shown is Colon → Lung.
+
+![Epoch](./outputs/figures/val_macro_f1_per_epoch.png)
+Validation Macro-F1 rises sharply from 0.268 → 0.678 → 0.886 by epoch 3 and reaches ~1.000 at epoch 4, with a tiny dip at epoch 5 before returning to 1.000 at epoch 6. The curve plateaus after epoch 4, indicating the model has effectively converged and extra epochs add little.
+
+![GB and Adapter](./outputs/figures/efficiency_panel.png)
+This panel shows the cost of adaptation. On the left, LoRA-r8 trains only about 42 MB of parameters (adapters), while ZeroShot trains none—highlighting that LoRA updates a tiny add-on rather than the whole model. On the right, LoRA reaches its best checkpoint in about 8.4 minutes, giving a quick turnaround for experiments.
+Because LoRA learns small adapters, they’re fast to retrain, easy to store/share, and can be swapped without touching the frozen base model.
+
+In practice, this is why LoRA: you get rapid task adaptation at low compute and storage cost, making iteration and deployment much lighter.
+
+## Results: Table, Statistical Significance
+
+
+
+
+
+
+## Next Steps:
+
+
+
+
+
+## Conclusion
+
+
+
+
+
+# Tech Stack

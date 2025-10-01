@@ -1,0 +1,19 @@
+{
+  "mcnemar": {
+    "b": 22,
+    "c": 1,
+    "N": 72,
+    "delta_accuracy": 0.291667,
+    "p": 6e-06
+  },
+  "bootstrap_macro_f1": {
+    "delta_macro_f1": 0.287964,
+    "delta_mean_boot": 0.290343,
+    "ci95": [
+      0.179508,
+      0.40259
+    ],
+    "p": 0.0,
+    "B": 5000
+  }
+}
