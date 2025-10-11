@@ -1,0 +1,34 @@
+{
+  "r": 16,
+  "trainable_params_mb": 83.886,
+  "training_time_wall": 377.9,
+  "val_macro_f1_curve": [
+    0.268,
+    0.4235,
+    1.0,
+    1.0,
+    1.0
+  ],
+  "val_accuracy_curve": [
+    0.3662,
+    0.4648,
+    1.0,
+    1.0,
+    1.0
+  ],
+  "val_loss_curve": [
+    8.5953,
+    11.073,
+    14.3398,
+    8.9332,
+    8.1083
+  ],
+  "train_loss_curve": [
+    0.4438,
+    0.0481,
+    0.036,
+    0.0223,
+    0.0005
+  ],
+  "best_val_macro_f1": 1.0
+}

@@ -69,3 +69,8 @@ if __name__ == "__main__":
     print("hf_token is", cfg.hf_token)
     print("lora ablatiosn are ", cfg.lora.r)
 
+
+# Remember to export the HF_TOKEN, otherwise, script will crash
+# Run python3 -m app.config
+# Was quick
+# Next, is eda.ipynb found in the data/ folder

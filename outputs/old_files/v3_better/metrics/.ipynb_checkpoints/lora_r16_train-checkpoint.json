@@ -1,0 +1,13 @@
+{
+  "r": 16,
+  "trainable_params_mb": 83.886,
+  "training_time_wall": 525.75,
+  "val_macro_f1_curve": [
+    0.1387,
+    0.212,
+    0.5197,
+    0.5649,
+    0.5447
+  ],
+  "best_val_macro_f1": 0.5649
+}
